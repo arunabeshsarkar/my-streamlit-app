@@ -9,36 +9,16 @@ from xgboost import XGBClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense
-from sklearn.preprocessing import MinMaxScaler
+# ===== UI =====
+st.set_page_config(layout="wide")
 
-# ===== WHITE UI =====
 st.markdown("""
 <style>
-.stApp {
-    background-color: white;
-    color: black;
-}
-h1, h2, h3, h4, h5, h6, p, span, label {
-    color: black !important;
-}
-div[data-baseweb="select"] {
-    background-color: white !important;
-    color: black !important;
-}
-button {
-    background-color: #f0f2f6 !important;
-    color: black !important;
-}
-table {
-    background-color: white !important;
-    color: black !important;
-}
+.stApp { background-color: white; color: black; }
+h1, h2, h3 { color: black; }
 </style>
 """, unsafe_allow_html=True)
 
-# ===== TITLE =====
 st.title("📈 Hybrid Stock & Crypto Prediction Dashboard")
 
 # ===== STOCK LIST =====
@@ -65,13 +45,13 @@ stock_name = st.selectbox(
     ]
 )
 
-# ===== ASSET TYPE =====
+# Asset type
 if "-USD" in stock_name:
     st.write("Asset Type: Cryptocurrency")
 else:
     st.write("Asset Type: Stock")
 
-# ===== DATA =====
+# ===== DOWNLOAD DATA =====
 data = yf.download(stock_name, start="2018-01-01")
 
 data.columns = [col[0] if isinstance(col, tuple) else col for col in data.columns]
@@ -131,31 +111,6 @@ xgb_conf = xgb.predict_proba(latest)[0][xgb_pred[0]]
 knn_pred = knn.predict(latest)
 knn_conf = knn.predict_proba(latest)[0][knn_pred[0]]
 
-# ===== LSTM =====
-scaler_lstm = MinMaxScaler()
-close_data = scaler_lstm.fit_transform(data[['Close']])
-
-X_lstm, y_lstm = [], []
-
-for i in range(10, len(close_data)):
-    X_lstm.append(close_data[i-10:i])
-    y_lstm.append(close_data[i])
-
-X_lstm = np.array(X_lstm)
-y_lstm = np.array(y_lstm)
-
-model_lstm = Sequential([
-    LSTM(50, input_shape=(10,1)),
-    Dense(1)
-])
-
-model_lstm.compile(optimizer='adam', loss='mse')
-model_lstm.fit(X_lstm, y_lstm, epochs=5, verbose=0)
-
-last_seq = close_data[-10:].reshape(1,10,1)
-lstm_pred = model_lstm.predict(last_seq)
-pred_price = scaler_lstm.inverse_transform(lstm_pred)[0][0]
-
 # ===== DATE =====
 tomorrow = datetime.date.today() + datetime.timedelta(days=1)
 
@@ -173,16 +128,12 @@ if knn_pred[0] == 1:
 else:
     st.info(f"KNN: 📉 DOWN (Confidence {knn_conf:.2f})")
 
-# Best Model
+# Best model
 if xgb_conf > knn_conf:
     st.write("🏆 Best Model: XGBoost")
 else:
     st.write("🏆 Best Model: KNN")
 
-# LSTM
-st.subheader("📉 LSTM Predicted Price")
-st.write(f"Expected Price Tomorrow: {round(pred_price, 2)}")
-
-# ===== DATA =====
+# ===== DATA TABLE =====
 st.subheader("📋 Latest Data")
 st.write(data.tail())
