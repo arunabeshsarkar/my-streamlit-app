@@ -12,37 +12,12 @@ from sklearn.neighbors import KNeighborsClassifier
 # ===== UI =====
 st.set_page_config(layout="wide")
 
-st.markdown("""
-<style>
-.stApp { background-color: white; color: black; }
-h1, h2, h3 { color: black; }
-</style>
-""", unsafe_allow_html=True)
-
 st.title("📈 Hybrid Stock & Crypto Prediction Dashboard")
 
 # ===== STOCK LIST =====
 stock_name = st.selectbox(
     "Select Stock / Crypto",
-    [
-        "AAPL", "TSLA", "GOOGL",
-
-        "RELIANCE.NS","TCS.NS","INFY.NS","HDFCBANK.NS","ICICIBANK.NS",
-        "KOTAKBANK.NS","SBIN.NS","AXISBANK.NS","LT.NS","ITC.NS",
-        "HINDUNILVR.NS","BHARTIARTL.NS","ASIANPAINT.NS","MARUTI.NS",
-        "SUNPHARMA.NS","ULTRACEMCO.NS","TITAN.NS","NESTLEIND.NS",
-        "BAJFINANCE.NS","BAJAJFINSV.NS","POWERGRID.NS","NTPC.NS",
-        "ONGC.NS","COALINDIA.NS","JSWSTEEL.NS","TATASTEEL.NS",
-        "WIPRO.NS","HCLTECH.NS","TECHM.NS","INDUSINDBK.NS",
-        "ADANIPORTS.NS","ADANIENT.NS","GRASIM.NS","CIPLA.NS",
-        "DRREDDY.NS","APOLLOHOSP.NS","DIVISLAB.NS","EICHERMOT.NS",
-        "HEROMOTOCO.NS","BAJAJ-AUTO.NS","BRITANNIA.NS","SHREECEM.NS",
-        "UPL.NS","SBILIFE.NS","HDFCLIFE.NS","ICICIPRULI.NS",
-        "TATACONSUM.NS","M&M.NS","HAVELLS.NS","DABUR.NS",
-
-        "BTC-USD","ETH-USD","BNB-USD","SOL-USD",
-        "XRP-USD","ADA-USD","DOGE-USD","MATIC-USD"
-    ]
+    ["AAPL", "TSLA", "GOOGL", "RELIANCE.NS", "BTC-USD", "ETH-USD"]
 )
 
 # Asset type
@@ -53,6 +28,11 @@ else:
 
 # ===== DOWNLOAD DATA =====
 data = yf.download(stock_name, start="2018-01-01")
+
+# 🚨 FIX 1: check empty data early
+if data is None or data.empty:
+    st.error("❌ Failed to fetch data. Try another symbol.")
+    st.stop()
 
 data.columns = [col[0] if isinstance(col, tuple) else col for col in data.columns]
 data['Close'] = pd.to_numeric(data['Close'], errors='coerce')
@@ -78,6 +58,11 @@ data['Target'] = (data['Close'].shift(-1) > data['Close']).astype(int)
 # Clean
 data = data.replace([np.inf, -np.inf], np.nan).dropna()
 
+# 🚨 FIX 2: check after cleaning
+if len(data) < 50:
+    st.error("❌ Not enough data after processing.")
+    st.stop()
+
 # ===== CHART =====
 st.subheader("📊 Price Chart")
 st.line_chart(data[['Close','MA20','MA50']])
@@ -92,11 +77,16 @@ features = [
 X = data[features]
 y = data['Target']
 
+# 🚨 FIX 3: check ML input
+if X.empty:
+    st.error("❌ No data available for model training.")
+    st.stop()
+
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
 # ===== MODELS =====
-xgb = XGBClassifier(n_estimators=300, max_depth=4)
+xgb = XGBClassifier(n_estimators=100, max_depth=3)
 xgb.fit(X_scaled, y)
 
 knn = KNeighborsClassifier(n_neighbors=5)
