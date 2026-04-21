@@ -17,7 +17,33 @@ st.title("📈 Hybrid Stock & Crypto Prediction Dashboard")
 # ===== STOCK LIST =====
 stock_name = st.selectbox(
     "Select Stock / Crypto",
-    ["AAPL", "TSLA", "GOOGL", "RELIANCE.NS", "BTC-USD", "ETH-USD"]
+    [
+        # ===== US STOCKS =====
+        "AAPL", "TSLA", "GOOGL",
+
+        # ===== NIFTY 50 (COMPLETE) =====
+        "RELIANCE.NS","TCS.NS","INFY.NS","HDFCBANK.NS","ICICIBANK.NS",
+        "KOTAKBANK.NS","SBIN.NS","AXISBANK.NS","LT.NS","ITC.NS",
+        "HINDUNILVR.NS","BHARTIARTL.NS","ASIANPAINT.NS","MARUTI.NS",
+        "SUNPHARMA.NS","ULTRACEMCO.NS","TITAN.NS","NESTLEIND.NS",
+        "BAJFINANCE.NS","BAJAJFINSV.NS","POWERGRID.NS","NTPC.NS",
+        "ONGC.NS","COALINDIA.NS","JSWSTEEL.NS","TATASTEEL.NS",
+        "WIPRO.NS","HCLTECH.NS","TECHM.NS","INDUSINDBK.NS",
+        "ADANIPORTS.NS","ADANIENT.NS","GRASIM.NS","CIPLA.NS",
+        "DRREDDY.NS","APOLLOHOSP.NS","DIVISLAB.NS","EICHERMOT.NS",
+        "HEROMOTOCO.NS","BAJAJ-AUTO.NS","BRITANNIA.NS","SHREECEM.NS",
+        "UPL.NS","SBILIFE.NS","HDFCLIFE.NS","ICICIPRULI.NS",
+        "TATACONSUM.NS","M&M.NS","HAVELLS.NS","DABUR.NS",
+
+        # ===== EXTRA POPULAR INDIAN STOCKS =====
+        "GRSE.NS","MOIL.NS","IRCTC.NS","HAL.NS","BEL.NS","IOC.NS",
+        "GAIL.NS","PNB.NS","BANKBARODA.NS","INDIGO.NS",
+
+        # ===== CRYPTO (MAJOR) =====
+        "BTC-USD","ETH-USD","BNB-USD","SOL-USD",
+        "XRP-USD","ADA-USD","DOGE-USD","MATIC-USD",
+        "LTC-USD","DOT-USD","AVAX-USD","SHIB-USD"
+    ]
 )
 
 # Asset type
